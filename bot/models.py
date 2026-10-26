@@ -1,9 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 NEW, ACCEPTED, IN_PROGRESS, DONE = "new", "accepted", "in_progress", "done"
+
+
+def utcnow() -> datetime:
+    # timestamps are set by the app, not by the DB server, so every backend stores the same UTC value
+    return datetime.now(timezone.utc)
 
 
 class Base(DeclarativeBase):
@@ -17,7 +22,7 @@ class User(Base):
     lang: Mapped[str] = mapped_column(String(2), default="uz")
     full_name: Mapped[str | None] = mapped_column(String(100))
     phone: Mapped[str | None] = mapped_column(String(20))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class Department(Base):
@@ -45,9 +50,9 @@ class Appeal(Base):
     assignee_id: Mapped[int | None] = mapped_column(BigInteger)
     assignee_name: Mapped[str | None] = mapped_column(String(200))
     group_message_id: Mapped[int | None] = mapped_column(BigInteger)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
     )
 
     department: Mapped[Department] = relationship(lazy="joined")

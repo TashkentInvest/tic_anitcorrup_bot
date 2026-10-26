@@ -5,7 +5,7 @@ from bot.config import get_settings
 from bot.data import DEPARTMENTS
 from bot.models import Base, Department
 
-engine = create_async_engine(get_settings().database_url, pool_pre_ping=True)
+engine = create_async_engine(get_settings().database_url, pool_pre_ping=True, pool_recycle=1800)
 Session = async_sessionmaker(engine, expire_on_commit=False)
 
 
